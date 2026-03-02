@@ -10,4 +10,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ItikafTracker.Application\ItikafTracker.Application.csproj" />
+    <ProjectReference Include="..\ItikafTracker.Infrastructure\ItikafTracker.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
