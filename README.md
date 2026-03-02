@@ -24,7 +24,10 @@ dotnet sln add ItikafTracker.API
 
 
 ### REFERENCE FILE
-dotnet add ItikafTracker.Application reference ItikafTracker.Domain
-dotnet add ItikafTracker.Infrastructure reference ItikafTracker.Application
+dotnet add ItikafTracker.Application reference ItikafTracker.Domain`
+dotnet add ItikafTracker.Infrastructure reference ItikafTracker.Application`
 dotnet add ItikafTracker.API reference ItikafTracker.Application
 dotnet add ItikafTracker.API reference ItikafTracker.Infrastructure
+
+### RUNNING PROJECT
+dotnet run --project ItikafTracker.API
