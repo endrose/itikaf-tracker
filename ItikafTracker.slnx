@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ItikafTracker.API/ItikafTracker.API.csproj" />
+  <Project Path="ItikafTracker.Application/ItikafTracker.Application.csproj" />
+  <Project Path="ItikafTracker.Domain/ItikafTracker.Domain.csproj" />
+  <Project Path="ItikafTracker.Infrastructure/ItikafTracker.Infrastructure.csproj" />
+</Solution>
