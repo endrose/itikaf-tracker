@@ -10,7 +10,7 @@ public class ItikafDto
   public string Nama { get; set; } = "";
   public string Alamat { get; set; } = "";
 
-  public string Telepon { get; set; } = "";
+  public long Telepon { get; set; }
 
   [JsonPropertyName("Tanggal Lahir")]
   public string TanggalLahir { get; set; } = "";

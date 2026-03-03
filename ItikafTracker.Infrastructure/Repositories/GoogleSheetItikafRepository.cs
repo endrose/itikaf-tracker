@@ -18,7 +18,10 @@ public class GoogleSheetItikafRepository : IItikafRepository
 
   private const string SheetUrlPost = "https://script.google.com/macros/s/AKfycbwkuuZYeIrTr1ANp_4N9hUlJKTBR4pUCccPkAvb1ic2GUAzbJCjr6NkJc3TaFfIpOwN/exec";
 
-  private const string SheetUrlPut = "https://script.google.com/macros/s/AKfycbxd_K3fEeppIZO6wAVKQ3sUCD0GY8Z5U1stqLF0erpH1Ie-39avzarbgAxBGsCQqI76/exec";
+  private const string SheetUrlPut = "https://script.google.com/macros/s/AKfycbzlVRexTEEvFCBgjghTPkavZyDXFOxyaKcSUhad3bS9n3FcYuzZqiJE7CS1SBAMyNRu/exec";
+
+
+  //  
 
   public GoogleSheetItikafRepository(HttpClient httpClient)
   {
@@ -69,27 +72,29 @@ public class GoogleSheetItikafRepository : IItikafRepository
 
   public async Task AddAsync(Itikaf itikaf)
   {
+
     try
     {
-      var json = JsonSerializer.Serialize(itikaf);
+      var json = JsonSerializer.Serialize(new
+      {
+        action = "create",
+        itikaf.Id,
+        itikaf.User,
+        itikaf.Nama,
+        itikaf.Alamat,
+        itikaf.Telepon,
+        itikaf.TanggalLahir,
+        itikaf.Asal,
+        itikaf.Awal,
+        itikaf.Akhir,
+        itikaf.Deskripsi
+      });
 
-      var content = new StringContent(
-          json,
-          System.Text.Encoding.UTF8,
-          "application/json"
-      );
+      var content = new StringContent(json, Encoding.UTF8, "application/json");
 
       var response = await _httpClient.PostAsync(SheetUrlPost, content);
 
-      var responseBody = await response.Content.ReadAsStringAsync();
-
-      Console.WriteLine("Response dari Google Script:");
-      Console.WriteLine(responseBody);
-
-      if (!response.IsSuccessStatusCode)
-      {
-        Console.WriteLine("Gagal menambahkan data: " + response.StatusCode);
-      }
+      Console.WriteLine(await response.Content.ReadAsStringAsync());
     }
     catch (Exception ex)
     {
@@ -142,16 +147,35 @@ public class GoogleSheetItikafRepository : IItikafRepository
 
   public async Task UpdateAsync(Itikaf itikaf)
   {
-    var json = JsonSerializer.Serialize(itikaf);
-
-    var request = new HttpRequestMessage(HttpMethod.Put, SheetUrlPut)
+    try
     {
-      Content = new StringContent(json, Encoding.UTF8, "application/json")
-    };
+      var json = JsonSerializer.Serialize(new
+      {
+        action = "update",
+        itikaf.Id,
+        itikaf.User,
+        itikaf.Nama,
+        itikaf.Alamat,
+        itikaf.Telepon,
+        itikaf.TanggalLahir,
+        itikaf.Asal,
+        itikaf.Awal,
+        itikaf.Akhir,
+        itikaf.Deskripsi
+      });
 
-    var response = await _httpClient.SendAsync(request);
+      var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-    var result = await response.Content.ReadAsStringAsync();
-    Console.WriteLine(result);
+      var response = await _httpClient.PostAsync(SheetUrlPut, content);
+
+      var result = await response.Content.ReadAsStringAsync();
+      Console.WriteLine(result);
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine("Error saat mengupdate data di Google Sheet: " + ex.Message);
+      throw;
+    }
+   
   }
 }

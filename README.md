@@ -29,8 +29,19 @@ dotnet add ItikafTracker.Infrastructure reference ItikafTracker.Application`
 dotnet add ItikafTracker.API reference ItikafTracker.Application
 dotnet add ItikafTracker.API reference ItikafTracker.Infrastructure
 
+### AUTH
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+dotnet add package Swashbuckle.AspNetCore
+
+### CREATE CONTROLLER
+dotnet new apicontroller -n AuthController -o Controllers
+
+
+### AUTH JWT
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer --version 8.0.5
+
 ### RUNNING PROJECT
-dotnet run --project ItikafTracker.API
+dotnet new controller -n AuthController -api
 
 
 ### BUILD
