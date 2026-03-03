@@ -31,3 +31,7 @@ dotnet add ItikafTracker.API reference ItikafTracker.Infrastructure
 
 ### RUNNING PROJECT
 dotnet run --project ItikafTracker.API
+
+
+### BUILD
+dotnet build

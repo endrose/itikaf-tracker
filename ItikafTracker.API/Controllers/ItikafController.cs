@@ -40,4 +40,15 @@ public class ItikafController : ControllerBase
     return Ok(itikaf);
   }
 
+  //PUT
+  [HttpPut("{id}")]
+  public async Task<IActionResult> Put(int id, Itikaf itikaf)
+  {
+    if (id != itikaf.Id)
+      return BadRequest("ID tidak cocok");
+
+    await _repository.UpdateAsync(itikaf);
+    return Ok(itikaf);
+  }
+
 }

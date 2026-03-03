@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using ItikafTracker.Application.Interfaces;
 
@@ -15,7 +16,9 @@ public class GoogleSheetItikafRepository : IItikafRepository
   // Ganti dengan URL CSV kamu
   private const string SheetUrl = "https://script.google.com/macros/s/AKfycbw6d75q_t8uuCr6n0LqmtW7jV0v8uCahKhXUvZzkxotEdoOejQvpeG95j6CGl6nuDQA/exec";
 
-  private const string SheetUrlPost = "https://script.google.com/macros/s/AKfycbwcq3ZLQaoxVPo5pIwhpa4bWZt7bEGgX7LSwTNu7oeTTZ46p7g9S11apT4O2TyYc6gM/exec";
+  private const string SheetUrlPost = "https://script.google.com/macros/s/AKfycbwkuuZYeIrTr1ANp_4N9hUlJKTBR4pUCccPkAvb1ic2GUAzbJCjr6NkJc3TaFfIpOwN/exec";
+
+  private const string SheetUrlPut = "https://script.google.com/macros/s/AKfycbxd_K3fEeppIZO6wAVKQ3sUCD0GY8Z5U1stqLF0erpH1Ie-39avzarbgAxBGsCQqI76/exec";
 
   public GoogleSheetItikafRepository(HttpClient httpClient)
   {
@@ -48,10 +51,10 @@ public class GoogleSheetItikafRepository : IItikafRepository
           x.Nama,
           x.Alamat,
           x.Telepon.ToString(),
-          x.TanggalLahir,
-          x.Asal,
-          x.Awal,
-          x.Akhir,
+             DateTime.Parse(x.TanggalLahir),
+    x.Asal,
+    DateTime.Parse(x.Awal),
+    DateTime.Parse(x.Akhir),
           x.Deskripsi
       )).ToList();
     }
@@ -61,7 +64,7 @@ public class GoogleSheetItikafRepository : IItikafRepository
 
       return new List<Itikaf>();
     }
-    
+
   }
 
   public async Task AddAsync(Itikaf itikaf)
@@ -121,19 +124,34 @@ public class GoogleSheetItikafRepository : IItikafRepository
           item.Nama,
           item.Alamat,
           item.Telepon.ToString(),
-          item.TanggalLahir,
-          item.Asal,
-          item.Awal,
-          item.Akhir,
+             DateTime.Parse(item.TanggalLahir),
+    item.Asal,
+    DateTime.Parse(item.Awal),
+    DateTime.Parse(item.Akhir),
           item.Deskripsi
       );
 
-      return Task.FromResult(itikaf);  
+      return Task.FromResult(itikaf);
     }
     catch (Exception ex)
     {
       Console.WriteLine("Error saat mengambil data berdasarkan ID dari Google Sheet: " + ex.Message);
       throw;
     }
+  }
+
+  public async Task UpdateAsync(Itikaf itikaf)
+  {
+    var json = JsonSerializer.Serialize(itikaf);
+
+    var request = new HttpRequestMessage(HttpMethod.Put, SheetUrlPut)
+    {
+      Content = new StringContent(json, Encoding.UTF8, "application/json")
+    };
+
+    var response = await _httpClient.SendAsync(request);
+
+    var result = await response.Content.ReadAsStringAsync();
+    Console.WriteLine(result);
   }
 }
