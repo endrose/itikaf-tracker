@@ -1,11 +1,14 @@
 using ItikafTracker.Application.Interfaces;
 using ItikafTracker.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ItikafTracker.API.Controllers;
 
 [ApiController]
 [Route("api/itikaf")]
+[Authorize]
+
 public class ItikafController : ControllerBase
 {
   private readonly IItikafRepository _repository;
