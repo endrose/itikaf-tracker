@@ -11,4 +11,6 @@ public interface IItikafRepository
   Task AddAsync(Itikaf itikaf);
 
   Task UpdateAsync(Itikaf itikaf);
+
+  Task DeleteAsync(int id);
 }

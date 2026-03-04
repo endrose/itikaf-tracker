@@ -54,4 +54,16 @@ public class ItikafController : ControllerBase
     return Ok(itikaf);
   }
 
+  //DELETE
+  [HttpDelete("{id}")]
+  public async Task<IActionResult> Delete(int id)
+  {
+    var existing = await _repository.GetByIdAsync(id);
+    if (existing == null)
+      return NotFound();
+
+    await _repository.DeleteAsync(id);
+    return NoContent();
+  }
+
 }

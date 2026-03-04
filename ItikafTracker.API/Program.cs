@@ -36,7 +36,23 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "ItikafTracker API",
-        Version = "v1"
+        Version = "v1",
+        Description = "API untuk melacak kegiatan itikaf selama bulan Ramadan",
+        Contact = new OpenApiContact
+        {
+            Name = "ENDROS",
+            Email = "endros@gmail.com",
+            Url = new Uri("https://endros.netlify.app/")
+        }
+        ,
+        License = new OpenApiLicense
+        {
+            Name = "MIT License",
+            Url = new Uri("https://opensource.org/licenses/MIT")
+        },
+        TermsOfService = new Uri("https://endros.netlify.app/"),
+
+
     });
 
     // 🔐 Tambah konfigurasi JWT di Swagger
@@ -70,11 +86,11 @@ builder.Services.AddHttpClient<IItikafRepository, GoogleSheetItikafRepository>()
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// if (app.Environment.IsDevelopment())
+// {
+//     app.UseSwagger();
+//     app.UseSwaggerUI();
+// }
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

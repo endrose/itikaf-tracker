@@ -176,6 +176,32 @@ public class GoogleSheetItikafRepository : IItikafRepository
       Console.WriteLine("Error saat mengupdate data di Google Sheet: " + ex.Message);
       throw;
     }
-   
+
   }
+  
+
+  public async Task DeleteAsync(int id)
+  {
+    try
+    {
+      var json = JsonSerializer.Serialize(new
+      {
+        action = "delete",
+        id
+      });
+
+      var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+      var response = await _httpClient.PostAsync(SheetUrlPut, content);
+
+      var result = await response.Content.ReadAsStringAsync();
+      Console.WriteLine(result);
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine("Error saat menghapus data di Google Sheet: " + ex.Message);
+      throw;
+    }
+
+  } 
 }
