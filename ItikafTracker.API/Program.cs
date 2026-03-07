@@ -7,9 +7,8 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ================= JWT CONFIG =================
 
-//## JWT CONFIGURATION
 var key = builder.Configuration["Jwt:Key"];
 
 builder.Services
@@ -24,13 +23,33 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(key!))
+            IssuerSigningKey =
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!))
         };
     });
 
+// ================= SERVICES =================
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddHttpClient<IItikafRepository, GoogleSheetItikafRepository>();
+
+// ================= CORS =================
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
+// ================= SWAGGER =================
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -43,19 +62,14 @@ builder.Services.AddSwaggerGen(options =>
             Name = "ENDROS",
             Email = "endros@gmail.com",
             Url = new Uri("https://endros.netlify.app/")
-        }
-        ,
+        },
         License = new OpenApiLicense
         {
             Name = "MIT License",
             Url = new Uri("https://opensource.org/licenses/MIT")
-        },
-        TermsOfService = new Uri("https://endros.netlify.app/"),
-
-
+        }
     });
 
-    // 🔐 Tambah konfigurasi JWT di Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -81,38 +95,25 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-builder.Services.AddHttpClient<IItikafRepository, GoogleSheetItikafRepository>();
 
-
-//CORS
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-
+// ================= BUILD APP =================
 
 var app = builder.Build();
 
-//CORS
+// ================= MIDDLEWARE =================
+
 app.UseCors("AllowAll");
 
-//Configure the HTTP request pipeline.
-// if (app.Environment.IsDevelopment())
-// {
-//     app.UseSwagger();
-//     app.UseSwaggerUI();
-// }
-app.MapGet("/", () => "ITIKAF TRACKER RUNNING"); app.UseSwagger();
-app.UseSwaggerUI();
 app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.MapGet("/", () => "ITIKAF TRACKER RUNNING");
+
+app.MapControllers();
 
 app.Run();
