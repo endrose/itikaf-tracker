@@ -83,7 +83,23 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddHttpClient<IItikafRepository, GoogleSheetItikafRepository>();
 
+
+//CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+
 var app = builder.Build();
+
+//CORS
+app.UseCors("AllowAll");
 
 //Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())
