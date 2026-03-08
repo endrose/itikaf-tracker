@@ -6,6 +6,9 @@ public interface IItikafRepository
 {
   Task<List<Itikaf>> GetAllAsync();
 
+  Task<List<Absen>> GetAbsensAsync();
+
+
   Task<Itikaf> GetByIdAsync(int id);
 
   Task AddAsync(Itikaf itikaf);

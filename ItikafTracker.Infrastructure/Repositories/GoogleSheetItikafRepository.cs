@@ -14,7 +14,9 @@ public class GoogleSheetItikafRepository : IItikafRepository
   private readonly HttpClient _httpClient;
 
   // Ganti dengan URL CSV kamu
-  private const string SheetUrl = "https://script.google.com/macros/s/AKfycbw6d75q_t8uuCr6n0LqmtW7jV0v8uCahKhXUvZzkxotEdoOejQvpeG95j6CGl6nuDQA/exec";
+  private const string SheetUrl = "https://script.google.com/macros/s/AKfycbw6d75q_t8uuCr6n0LqmtW7jV0v8uCahKhXUvZzkxotEdoOejQvpeG95j6CGl6nuDQA/exec?action=itikaf";
+  private const string SheetUrlAbsen = "https://script.google.com/macros/s/AKfycbxfiylrm9YFEzxitAQlJ7DNn_JsrKSIRiXznAdZgmcr1gC2bYQRuquO6cdirbHOIJYW/exec?action=absen";
+
 
   private const string SheetUrlPost = "https://script.google.com/macros/s/AKfycbwkuuZYeIrTr1ANp_4N9hUlJKTBR4pUCccPkAvb1ic2GUAzbJCjr6NkJc3TaFfIpOwN/exec";
 
@@ -203,5 +205,39 @@ public class GoogleSheetItikafRepository : IItikafRepository
       throw;
     }
 
-  } 
+  }
+
+  public async Task<List<Absen>> GetAbsensAsync() 
+  {
+    try
+    {
+      var response = await _httpClient.GetStringAsync(SheetUrlAbsen);
+
+      var options = new JsonSerializerOptions
+      {
+        PropertyNameCaseInsensitive = true
+      };
+
+      var data = JsonSerializer.Deserialize<List<AbsenDto>>(response, options);
+
+
+      Console.WriteLine("Data dari Google Sheet:" + response);
+      if (data == null)
+        return new List<Absen>();
+      return data.Select(x => new Absen(
+          x.Id,
+          x.User,
+          x.Nama,
+          x.Kehadiran,
+          DateTime.Parse(x.Waktu)
+      )).ToList();
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine("Error saat mengambil data dari Google Sheet: " + ex.Message);
+
+      return new List<Absen>();
+    }
+  }
+
 }
