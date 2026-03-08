@@ -97,22 +97,17 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // ================= BUILD APP =================
-
 var app = builder.Build();
 
-// ================= MIDDLEWARE =================
+app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
-
-app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
-app.MapGet("/", () => "ITIKAF TRACKER RUNNING");
 
 app.MapControllers();
 
