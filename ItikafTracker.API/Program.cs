@@ -108,7 +108,7 @@ app.UseAuthorization();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.MapGet("/test", () => "API OK");
 app.MapControllers();
 
 app.Run();
