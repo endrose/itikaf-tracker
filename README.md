@@ -48,7 +48,7 @@ dotnet new controller -n AuthController -api
 dotnet build
 
 ### PUBLISH
->dotnet publish ItikafTracker.API -c Release -o publish
+dotnet publish ItikafTracker.API -c Release -o publish
 
 ## RUNNING PROJECT
 dotnet run -p ItikafTracker.API/ItikafTracker.API.csproj
