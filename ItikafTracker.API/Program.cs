@@ -34,6 +34,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddHttpClient<IItikafRepository, GoogleSheetItikafRepository>();
+builder.Services.AddHttpClient<IAbsenRepository, GoogleSheetItikafRepository>();
+
 
 // ================= CORS =================
 
@@ -108,7 +110,7 @@ app.UseAuthorization();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-app.MapGet("/test", () => "API OK");
+app.MapGet("/",  () => "Muslim Apps is running");
 app.MapControllers();
 
 app.Run();

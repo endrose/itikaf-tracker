@@ -9,7 +9,7 @@ using ItikafTracker.Infrastructure.Models;
 
 namespace ItikafTracker.Infrastructure.Repositories;
 
-public class GoogleSheetItikafRepository : IItikafRepository
+public class GoogleSheetItikafRepository : IItikafRepository, IAbsenRepository
 {
   private readonly HttpClient _httpClient;
 
@@ -21,6 +21,11 @@ public class GoogleSheetItikafRepository : IItikafRepository
   private const string SheetUrlPost = "https://script.google.com/macros/s/AKfycbwkuuZYeIrTr1ANp_4N9hUlJKTBR4pUCccPkAvb1ic2GUAzbJCjr6NkJc3TaFfIpOwN/exec";
 
   private const string SheetUrlPut = "https://script.google.com/macros/s/AKfycbzlVRexTEEvFCBgjghTPkavZyDXFOxyaKcSUhad3bS9n3FcYuzZqiJE7CS1SBAMyNRu/exec";
+
+
+  private const string newSheetUrl = "https://script.google.com/macros/s/AKfycbzg6hbUKx47OJ-b0rewUgyKP3JnFTRMm93stbzyuiAXmyzYfJEs2lwfdxpAALr7mbRg/exec";
+
+  
 
 
   //  
@@ -36,7 +41,9 @@ public class GoogleSheetItikafRepository : IItikafRepository
 
     try
     {
-      var response = await _httpClient.GetStringAsync(SheetUrl);
+
+      var url = $"{newSheetUrl}?action=itikaf";
+      var response = await _httpClient.GetStringAsync(url);
 
       var options = new JsonSerializerOptions
       {
@@ -104,11 +111,16 @@ public class GoogleSheetItikafRepository : IItikafRepository
     }
   }
 
-  public Task<Itikaf> GetByIdAsync(int id)
+  public async Task<Itikaf> GetByIdAsync(int id)
   {
     try
     {
-      var response = _httpClient.GetStringAsync(SheetUrl).Result;
+      var url = $"{newSheetUrl}?action=itikaf&id={id}";
+      Console.WriteLine(url);
+
+      var response = await _httpClient.GetStringAsync(url);
+
+      Console.WriteLine("Data dari Google Sheet: " + response);
 
       var options = new JsonSerializerOptions
       {
@@ -117,13 +129,10 @@ public class GoogleSheetItikafRepository : IItikafRepository
 
       var data = JsonSerializer.Deserialize<List<ItikafDto>>(response, options);
 
-      Console.WriteLine("Data dari Google Sheet:" + response);
-      if (data == null)
-        return Task.FromResult<Itikaf>(null);
+      var item = data?.FirstOrDefault(x => x.Id == id);
 
-      var item = data.FirstOrDefault(x => x.Id == id);
       if (item == null)
-        return Task.FromResult<Itikaf>(null);
+        throw new InvalidOperationException($"Itikaf with ID {id} not found.");
 
       var itikaf = new Itikaf(
           item.Id,
@@ -131,14 +140,14 @@ public class GoogleSheetItikafRepository : IItikafRepository
           item.Nama,
           item.Alamat,
           item.Telepon.ToString(),
-             DateTime.Parse(item.TanggalLahir),
-    item.Asal,
-    DateTime.Parse(item.Awal),
-    DateTime.Parse(item.Akhir),
+          DateTime.Parse(item.TanggalLahir),
+          item.Asal,
+          DateTime.Parse(item.Awal),
+          DateTime.Parse(item.Akhir),
           item.Deskripsi
       );
 
-      return Task.FromResult(itikaf);
+      return itikaf;
     }
     catch (Exception ex)
     {
@@ -153,6 +162,7 @@ public class GoogleSheetItikafRepository : IItikafRepository
     {
       var json = JsonSerializer.Serialize(new
       {
+        endpoint= "itikaf",
         action = "update",
         itikaf.Id,
         itikaf.User,
@@ -168,7 +178,7 @@ public class GoogleSheetItikafRepository : IItikafRepository
 
       var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-      var response = await _httpClient.PostAsync(SheetUrlPut, content);
+      var response = await _httpClient.PostAsync(newSheetUrl, content);
 
       var result = await response.Content.ReadAsStringAsync();
       Console.WriteLine(result);
@@ -180,7 +190,7 @@ public class GoogleSheetItikafRepository : IItikafRepository
     }
 
   }
-  
+
 
   public async Task DeleteAsync(int id)
   {
@@ -188,13 +198,16 @@ public class GoogleSheetItikafRepository : IItikafRepository
     {
       var json = JsonSerializer.Serialize(new
       {
+        endpoint = "itikaf",
         action = "delete",
-        id
+        Id = id
       });
+
+      Console.WriteLine(json);
 
       var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-      var response = await _httpClient.PostAsync(SheetUrlPut, content);
+      var response = await _httpClient.PostAsync(newSheetUrl, content);
 
       var result = await response.Content.ReadAsStringAsync();
       Console.WriteLine(result);
@@ -207,11 +220,13 @@ public class GoogleSheetItikafRepository : IItikafRepository
 
   }
 
-  public async Task<List<Absen>> GetAbsensAsync() 
+  public async Task<List<Absen>> GetAbsensAsync()
   {
     try
     {
-      var response = await _httpClient.GetStringAsync(SheetUrlAbsen);
+      var url = $"{newSheetUrl}?action=absen";
+
+      var response = await _httpClient.GetStringAsync(url);
 
       var options = new JsonSerializerOptions
       {
@@ -220,24 +235,152 @@ public class GoogleSheetItikafRepository : IItikafRepository
 
       var data = JsonSerializer.Deserialize<List<AbsenDto>>(response, options);
 
+      Console.WriteLine("Data dari Google Sheet: " + response);
 
-      Console.WriteLine("Data dari Google Sheet:" + response);
       if (data == null)
         return new List<Absen>();
-      return data.Select(x => new Absen(
-          x.Id,
-          x.User,
-          x.Nama,
-          x.Kehadiran,
-          DateTime.Parse(x.Waktu)
-      )).ToList();
+
+      return data.Select(x =>
+      {
+        DateTime.TryParse(x.Waktu, out var waktu);
+
+        return new Absen(
+              x.Id,
+              x.User,
+              x.Nama,
+              x.Kehadiran,
+              waktu
+          );
+      }).ToList();
     }
     catch (Exception ex)
     {
       Console.WriteLine("Error saat mengambil data dari Google Sheet: " + ex.Message);
-
       return new List<Absen>();
     }
   }
 
+  public async Task<Absen> GetByIdAbsenAsync(int id)
+  {
+    try
+    {
+      var url = $"{newSheetUrl}?action=absen&id={id}";
+      Console.WriteLine(url);
+
+      var response = await _httpClient.GetStringAsync(url);
+
+      Console.WriteLine("Data dari Google Sheet: " + response);
+
+      var options = new JsonSerializerOptions
+      {
+        PropertyNameCaseInsensitive = true
+      };
+
+      var data = JsonSerializer.Deserialize<List<AbsenDto>>(response, options);
+
+      var item = data?.FirstOrDefault();
+
+      if (item == null)
+        throw new InvalidOperationException($"Absen with ID {id} not found.");
+
+      var absen = new Absen(
+          item.Id,
+          item.User,
+          item.Nama,
+          item.Kehadiran,
+          DateTime.Parse(item.Waktu)
+      );
+
+      return absen;
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine("Error saat mengambil data berdasarkan ID dari Google Sheet: " + ex.Message);
+      throw;
+    }
+  }
+
+  public async Task AddAbsenAsync(Absen absen)
+  {
+    try
+    {
+
+
+      var json = JsonSerializer.Serialize(new
+      {
+        endpoint = "absen",
+        action = "create",
+        absen.Id,
+        absen.User,
+        absen.Nama,
+        absen.Kehadiran,
+        absen.Waktu
+      });
+
+      var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+      var response = await _httpClient.PostAsync(newSheetUrl, content);
+
+      Console.WriteLine(await response.Content.ReadAsStringAsync());
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine("Error saat POST: " + ex.Message);
+    }
+  }
+
+  public  async Task UpdateAbsenAsync(Absen absen)
+  {
+    try
+    {
+      var json = JsonSerializer.Serialize(new
+      {
+        endpoint = "absen",
+        action = "update",
+        absen.Id,
+        absen.User,
+        absen.Nama,
+        absen.Kehadiran,
+        absen.Waktu
+      });
+
+      var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+      var response = await _httpClient.PostAsync(newSheetUrl, content);
+
+      var result = await response.Content.ReadAsStringAsync();
+      Console.WriteLine(result);
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine("Error saat mengupdate data di Google Sheet: " + ex.Message);
+      throw;
+    }
+  }
+
+  public async Task DeleteAbsenAsync(int id)
+  {
+    try
+    {
+      var json = JsonSerializer.Serialize(new
+      {
+        endpoint = "absen",
+        action = "delete",
+        Id = id
+
+      });
+
+      var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+      var response = await _httpClient.PostAsync(newSheetUrl, content);
+
+      var result = await response.Content.ReadAsStringAsync();
+      Console.WriteLine(result);
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine("Error saat menghapus data di Google Sheet: " + ex.Message);
+      throw;
+    }
+  }
 }

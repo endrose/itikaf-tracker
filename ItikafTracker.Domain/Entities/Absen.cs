@@ -15,7 +15,7 @@ public class Absen
       string nama,
       string kehadiran,
       DateTime waktu
-      
+
       )
   {
    
@@ -25,4 +25,5 @@ public class Absen
     Kehadiran = kehadiran;
     Waktu = waktu;
   }
+  
 }

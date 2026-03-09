@@ -9,14 +9,9 @@ namespace ItikafTracker.API.Controllers;
 [Route("api/absen")]
 [Authorize]
 
-public class AbsenController : ControllerBase
+public class AbsenController(IAbsenRepository repository) : ControllerBase
 {
-  private readonly IItikafRepository _repository;
-
-  public AbsenController(IItikafRepository repository)
-  {
-    _repository = repository;
-  }
+  private readonly IAbsenRepository _repository = repository;
 
   [HttpGet]
   public async Task<IActionResult> Get()
@@ -25,45 +20,47 @@ public class AbsenController : ControllerBase
     return Ok(data);
   }
 
-  // [HttpGet("{id}")]
-  // public async Task<IActionResult> GetById(int id)
-  // {
-  //   var data = await _repository.GetByIdAsync(id);
-  //   if (data == null)
-  //     return NotFound();
+  [HttpGet("{id}")]
+  public async Task<IActionResult> GetById(int id)
+  {
+    var data = await _repository.GetByIdAbsenAsync(id);
+    if (data == null)
+      return NotFound();
 
-  //   return Ok(data);
-  // }
+    return Ok(data);
+  }
 
-  // //POST
-  // [HttpPost]
-  // public async Task<IActionResult> Post(Absen absen)
-  // {
-  //   await _repository.AddAsync(absen);
-  //   return Ok(absen);
-  // }
+  //POST
+  [HttpPost]
+  public async Task<IActionResult> Post([FromBody] Absen absen)
+  {
+    await _repository.AddAbsenAsync(absen);
+    return Ok(absen);
+  }
 
-  // //PUT
-  // [HttpPut("{id}")]
-  // public async Task<IActionResult> Put(int id, Itikaf itikaf)
-  // {
-  //   if (id != itikaf.Id)
-  //     return BadRequest("ID tidak cocok");
+  //PUT
+  [HttpPut("{id}")]
+  public async Task<IActionResult> Put(int id, Absen absen)
+  {
+    if (id != absen.Id)
+      return BadRequest("ID tidak cocok");
 
-  //   await _repository.UpdateAsync(itikaf);
-  //   return Ok(itikaf);
-  // }
+    await _repository.UpdateAbsenAsync(absen);
+    return Ok(absen);
+  }
 
-  // //DELETE
-  // [HttpDelete("{id}")]
-  // public async Task<IActionResult> Delete(int id)
-  // {
-  //   var existing = await _repository.GetByIdAsync(id);
-  //   if (existing == null)
-  //     return NotFound();
 
-  //   await _repository.DeleteAsync(id);
-  //   return NoContent();
-  // }
+
+  //DELETE
+  [HttpDelete("{id}")]
+  public async Task<IActionResult> Delete(int id)
+  {
+    var existing = await _repository.GetByIdAbsenAsync(id);
+    if (existing == null)
+      return NotFound();
+
+    await _repository.DeleteAbsenAsync(id);
+    return NoContent();
+  }
 
 }
